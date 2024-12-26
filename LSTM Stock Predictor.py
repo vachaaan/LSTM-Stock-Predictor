@@ -11,6 +11,7 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
+from tensorflow.keras.callbacks import EarlyStopping
 
 # Fetch data using yfinance
 ticker = input("Enter ticker:")
@@ -121,10 +122,15 @@ model = Sequential([
     layers.Dense(32, activation='relu'),
     layers.Dense(1)                                                        # Outputs a single value (the predicted target).
 ])
-
+# Define EarlyStopping callback
+early_stopping = EarlyStopping(
+    monitor='val_loss',   # Monitor validation loss
+    patience=10,          # Stop if no improvement for 10 epochs
+    restore_best_weights=True  # Revert to the best model weights
+)
 model.compile(loss='mse', optimizer=Adam(learning_rate=0.001), metrics=['mean_absolute_error'])
 print("Training begins...")
-model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100)
+model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, callbacks=[early_stopping])
 
 # Make predictions and visualize
 train_predictions = model.predict(X_train).flatten()                       # Converts predictions from a 2D array (e.g., [ [value1], [value2] ]) into a 1D array (e.g., [value1, value2]).
