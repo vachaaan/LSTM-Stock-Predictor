@@ -12,6 +12,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
 from tensorflow.keras.callbacks import EarlyStopping
+from sklearn import preprocessing
 
 # Fetch data using yfinance
 ticker = input("Enter ticker:")
@@ -22,11 +23,16 @@ end_date= input("Enter the end date(yyyy-mm-dd):")
 # Download historical data
 df = yf.download(ticker, start=start_date, end=final_date)
 
+
 # Select only 'Close' prices and reset index
 df = df[['Close']].reset_index()
 df['Date'] = pd.to_datetime(df['Date'])  # Ensure 'Date' is in datetime format
 # Retain both 'Date' column and set it as the index
 df.set_index('Date', inplace=True)
+df=df.pct_change().dropna()
+#min_max_scaler = preprocessing.MinMaxScaler()
+#df[['Close']] = min_max_scaler.fit_transform(df[['Close']])
+print(df.head())
 
 # Function to convert string to datetime for easier manipulation
 def str_to_datetime(s):
@@ -52,6 +58,7 @@ def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3):
 
     last_time = False
     while True:
+        print(target_date)
         df_subset = dataframe.loc[:target_date].tail(n + 1)
         if len(df_subset) != n + 1:
             print(f'Error: Window of size {n} is too large for date {target_date}')
@@ -109,7 +116,7 @@ dates, X, y = windowed_df_to_date_X_y(windowed_df)
 # Split into training, validation, and test sets
 q_80 = int(len(dates) * 0.8)
 q_90 = int(len(dates) * 0.9)
-
+df_train = df[:q_80]  # Assuming q_80 is the split index for training
 dates_train, X_train, y_train = dates[:q_80], X[:q_80], y[:q_80]
 dates_val, X_val, y_val = dates[q_80:q_90], X[q_80:q_90], y[q_80:q_90]
 dates_test, X_test, y_test = dates[q_90:], X[q_90:], y[q_90:]
