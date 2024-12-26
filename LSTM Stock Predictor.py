@@ -29,10 +29,8 @@ df = df[['Close']].reset_index()
 df['Date'] = pd.to_datetime(df['Date'])  # Ensure 'Date' is in datetime format
 # Retain both 'Date' column and set it as the index
 df.set_index('Date', inplace=True)
-df=df.pct_change().dropna()
-#min_max_scaler = preprocessing.MinMaxScaler()
-#df[['Close']] = min_max_scaler.fit_transform(df[['Close']])
-print(df.head())
+#df=df.pct_change().dropna() # use this for percentage returns
+print(df)
 
 # Function to convert string to datetime for easier manipulation
 def str_to_datetime(s):
